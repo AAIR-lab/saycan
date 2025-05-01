@@ -498,7 +498,7 @@ if __name__ == "__main__":
   EXAMPLE_CONFIG_EVAL = {
     "pick":  get_objects(["red", "blue", "green", "yellow", "cyan", "purple"],
       "block"),
-    "place":  get_objects(["red", "blue"], "bowl")
+    "place":  []
   }
 
   env = PickPlaceEnv(EXAMPLE_CONFIG_EVAL, enable_gui=True)
