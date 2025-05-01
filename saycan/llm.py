@@ -1,6 +1,7 @@
 import openai
 from constants import *
 import clip
+from transformers import AutoTokenizer
 
 openai.api_key = ""
 #@title LLM Cache
@@ -9,74 +10,86 @@ if overwrite_cache:
   LLM_CACHE = {}
 ENGINE = "text-davinci-003"
 ENGINE = "text-ada-001"
-#@title LLM Scoring
-def gpt3_call(engine=ENGINE, prompt="", max_tokens=128, temperature=0,
-              logprobs=1, echo=False):
-  full_query = ""
-  for p in prompt:
-    full_query += p
-  id = tuple((engine, full_query, max_tokens, temperature, logprobs, echo))
-  if id in LLM_CACHE.keys():
-    print('cache hit, returning')
-    response = LLM_CACHE[id]
-  else:
-    response = openai.Completion.create(engine=engine,
-                                        prompt=prompt,
-                                        max_tokens=max_tokens,
-                                        temperature=temperature,
-                                        logprobs=logprobs,
-                                        echo=echo)
-    LLM_CACHE[id] = response
-  return response
 
-def gpt3_scoring(query, options, engine=ENGINE, limit_num_options=None, option_start="\n", verbose=False, print_tokens=False):
-  if limit_num_options:
-    options = options[:limit_num_options]
-  verbose and print("Scoring", len(options), "options")
-  gpt3_prompt_options = [query + option for option in options]
-  response = gpt3_call(
-      engine=engine,
-      prompt=gpt3_prompt_options,
-      max_tokens=0,
-      logprobs=1,
-      temperature=0,
-      echo=True,)
+class SayCanLLMClient:
 
-  scores = {}
-  for option, choice in zip(options, response["choices"]):
-    tokens = choice["logprobs"]["tokens"]
-    token_logprobs = choice["logprobs"]["token_logprobs"]
+  def __init__(self, model, temperature=0,
+    api_key=None, base_url=None):
 
-    total_logprob = 0
-    for token, token_logprob in zip(reversed(tokens), reversed(token_logprobs)):
-      print_tokens and print(token, token_logprob)
-      if option_start is None and not token in option:
-        break
-      if token == option_start:
-        break
-      total_logprob += token_logprob
-    scores[option] = total_logprob
+    self.model = model
+    self.temperature = temperature
+    self.client = openai.OpenAI(api_key=api_key, base_url=base_url)
+    self.cached_responses = {}
+    self.tokenizer = AutoTokenizer.from_pretrained(model)
 
-  for i, option in enumerate(sorted(scores.items(), key=lambda x : -x[1])):
-    verbose and print(option[1], "\t", option[0])
-    if i >= 10:
-      break
+  def get_responses(self, prompts):
 
-  return scores, response
+    assert isinstance(prompts, list)
+    prompt_cache_key = "".join(prompts)
 
-def make_options(pick_targets=None, place_targets=None, options_in_api_form=True, termination_string="done()"):
-  if not pick_targets:
-    pick_targets = PICK_TARGETS
-  if not place_targets:
-    place_targets = PLACE_TARGETS
-  options = []
+    try:
+      response = self.cached_responses[prompt_cache_key]
+    except KeyError:
+
+      response = self.client.completions.create(model=self.model,
+                                          prompt=prompts,
+                                          max_tokens=0,
+                                          temperature=self.temperature,
+                                          logprobs=1,
+                                          echo=True)
+
+      # Convert it to the dictionary to match legacy code
+      # openai new v1 responses use response.choices
+      response = response.to_dict()
+    
+      self.cached_responses[prompt_cache_key] = response
+
+    return response
+
+  def get_scores(self, prompt, actions):
+
+    few_shot_prompt = str(prompt)
+
+    # The last token is the one we want to wait on since it marks
+    # the start of all options
+    assert few_shot_prompt[-1] == prompt.separator
+
+    action_start_token = self.tokenizer.tokenize(few_shot_prompt)[-1]
+
+    prompts = [few_shot_prompt + action for action in actions]
+    response = self.get_responses(prompts)
+
+    scores = {}
+    for action, choice in zip(actions, response["choices"]):
+      tokens = reversed(choice["logprobs"]["tokens"])
+      token_logprobs = reversed(choice["logprobs"]["token_logprobs"])
+
+      total_logprob = 0
+      debug_end_found = False
+      for token, token_logprob in zip(tokens, token_logprobs):
+        if token == action_start_token:
+          debug_end_found = True
+          break
+        total_logprob += token_logprob
+      
+      # Need to make sure that the right option was found and that the
+      # whole prompt was not considered
+      assert debug_end_found
+      scores[action] = total_logprob
+
+    return scores
+
+def generate_possible_actions(pick_targets, place_targets, termination_string,
+  actions_in_api_form=True):
+
+  actions = []
   for pick in pick_targets:
     for place in place_targets:
-      if options_in_api_form:
-        option = "robot.pick_and_place({}, {})".format(pick, place)
+      if actions_in_api_form:
+        action = "robot.pick_and_place({}, {})".format(pick, place)
       else:
-        option = "Pick the {} and place it on the {}.".format(pick, place)
-      options.append(option)
+        action = "Pick the {} and place it on the {}.".format(pick, place)
+      actions.append(action)
 
-  options.append(termination_string)
-  return options
+  actions.append(termination_string)
+  return actions
