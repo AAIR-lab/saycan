@@ -51,3 +51,25 @@ for few_shot_context_line in FEW_SHOT_PROMPT.split("\n"):
   few_shot_context_lines.append(few_shot_context_line)
 
 FEW_SHOT_PROMPT = "\n".join(few_shot_context_lines)
+
+class Prompt:
+
+    def __init__(self, init_prompt=FEW_SHOT_PROMPT, separator="\n",
+        termination_string=TERMINATION_STRING):
+
+        self.init_prompt = init_prompt
+        self.separator = separator
+        self.prompt = init_prompt
+        self.termination_string = termination_string
+
+    def append(self, text):
+
+        self.prompt += self.separator + text
+
+    def __str__(self):
+
+        return self.prompt
+
+    def __repr__(self):
+
+        return str(self)
