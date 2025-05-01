@@ -43,6 +43,8 @@ class SayCan:
         self.affordance_scores = helper.affordance_scoring(self.actions,
             self.found_objects, block_name="box", bowl_name="circle",
             verbose=False)
+
+        self.task_no = 0
     
     def _get_env_description(self):
 
@@ -68,13 +70,18 @@ class SayCan:
 
     def saycan(self, task_prompt, client, max_horizon=10):
         
+        task_dir = "%s/task%u" % (self.output_dir, self.task_no)
+        os.makedirs(task_dir, exist_ok=True)
+        print("Saving data to:", task_dir)
+
         high_level_actions = []
         selected_action = ""
         h = 0
         while selected_action != task_prompt.termination_string \
             and h < max_horizon:
 
-            h += 1
+            with open("%s/prompt-%u.txt" % (task_dir, h), "w") as fh:
+                fh.write(str(task_prompt))
 
             llm_scores = client.get_scores(task_prompt, self.actions)
 
@@ -88,7 +95,13 @@ class SayCan:
             high_level_actions.append(selected_action)
 
             task_prompt.append(selected_action, add_separator=True)
+            h += 1
 
+            fig_filepath = "%s/%s.png" % (task_dir, selected_action)
+            helper.plot(llm_scores, self.affordance_scores, saycan_scores,
+                selected_action, fig_filepath=fig_filepath)
+
+        self.task_no += 1
         return high_level_actions
 
     def execute_plan(self, high_level_actions):
@@ -120,7 +133,7 @@ if __name__ == "__main__":
 
     env = PickPlaceEnv(TASK_CONFIG)
     _ = env.reset()
-    saycan = SayCan(env)
+    saycan = SayCan(env, clean=False)
 
     import openai
     api_key = "invalid"

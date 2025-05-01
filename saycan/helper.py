@@ -23,7 +23,9 @@ def normalize_scores(scores):
   normed_scores = {key: np.clip(scores[key] / max_score, 0, 1) for key in scores}
   return normed_scores
 
-def plot_saycan(llm_scores, vfs, combined_scores, task, correct=True, show_top=None):
+def plot(llm_scores, vfs, combined_scores, task, 
+  correct=True, show_top=None, show_plot=False, fig_filepath=None):
+
   if show_top:
     top_options = nlargest(show_top, combined_scores, key = combined_scores.get)
     # add a few top llm options in if not already shown
@@ -72,8 +74,12 @@ def plot_saycan(llm_scores, vfs, combined_scores, task, correct=True, show_top=N
   key_strings = [key.replace("robot.pick_and_place", "").replace(", ", " to ").replace("(", "").replace(")","") for key in keys]
   plt.xticks(positions, key_strings, **font)
   ax1.legend()
-  plt.show()
+  
+  if show_plot:
+    plt.show()
 
+  if fig_filepath is not None:
+    fig.savefig(fig_filepath, bbox_inches="tight")
 
 #@title Affordance Scoring
 #@markdown Given this environment does not have RL-trained policies or an asscociated value function, we use affordances through an object detector.
