@@ -1,7 +1,6 @@
+import saycan
 import numpy as np
-#@markdown ViLD prompt engineering.
 
-#@markdown ViLD Result Visualization
 import PIL.ImageColor as ImageColor
 import PIL.ImageDraw as ImageDraw
 import PIL.ImageFont as ImageFont
@@ -20,7 +19,8 @@ import jax.numpy as jnp
 from moviepy.editor import ImageSequenceClip
 import IPython
 from IPython.display import display
-from llm import encode_text
+from saycan.clip_model import CLIPModel
+
 STANDARD_COLORS = ["White"]
 # STANDARD_COLORS = [
 #     "AliceBlue", "Chartreuse", "Aqua", "Aquamarine", "Azure", "Beige", "Bisque",
@@ -52,6 +52,8 @@ STANDARD_COLORS = ["White"]
 #     "There is {article} {} in the scene.",
 #     "a painting of a {}.",
 # ]
+
+clip_model = CLIPModel()
 
 multiple_templates = [
     'There is {article} {} in the scene.',
@@ -140,6 +142,25 @@ FLAGS = {
 }
 FLAGS = EasyDict(FLAGS)
 
+def get_vild_optimizer(checkpoint_dir=saycan.ASSETS_DIR, seed=0,
+  checkpoint=40000):
+
+  rng = jax.random.PRNGKey(seed)
+  rng, key = jax.random.split(rng)
+  init_img = jnp.ones((4, 224, 224, 5), jnp.float32)
+  init_text = jnp.ones((4, 512), jnp.float32)
+  init_pix = jnp.zeros((4, 2), np.int32)
+  init_params = TransporterNets().init(
+    key, init_img, init_text, init_pix)['params']
+  
+  # print(f'Model parameters: {n_params(init_params):,}')
+  optimizer = flax.optim.Adam(learning_rate=1e-4).create(init_params)
+  ckpt_path = "%s/ckpt_%s" % (checkpoint_dir, checkpoint)
+  assert os.path.exists(ckpt_path)
+  optimizer = checkpoints.restore_checkpoint(ckpt_path, optimizer)
+
+  return optimizer, n_params(init_params)
+
 
 def article(name):
   return "an" if name[0] in "aeiou" else "a"
@@ -181,7 +202,7 @@ def build_text_embedding(categories):
       texts = clip.tokenize(texts) #tokenize
       if run_on_gpu:
         texts = texts.cuda()
-      text_embeddings = encode_text(texts) #embed with text encoder
+      text_embeddings = clip_model.encode_text(texts) #embed with text encoder
       text_embeddings /= text_embeddings.norm(dim=-1, keepdim=True)
       text_embedding = text_embeddings.mean(dim=0)
       text_embedding /= text_embedding.norm()
@@ -781,7 +802,7 @@ def run_cliport(optim, env, obs, text, video_path="tmp.mp4", show_state=False):
   # Tokenize text and get CLIP features.
   text_tokens = clip.tokenize(text).cuda()
   with torch.no_grad():
-    text_feats = encode_text(text_tokens).float()
+    text_feats = clip_model.encode_text(text_tokens).float()
   text_feats /= text_feats.norm(dim=-1, keepdim=True)
   text_feats = np.float32(text_feats.cpu())
 

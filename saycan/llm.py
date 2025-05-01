@@ -81,16 +81,3 @@ def make_options(pick_targets=None, place_targets=None, options_in_api_form=True
   options.append(termination_string)
   print("Considering", len(options), "options")
   return options
-
-
-#@markdown Load CLIP model.
-
-# torch.cuda.set_per_process_memory_fraction(0.9, None)
-clip_model, clip_preprocess = clip.load("ViT-B/32")
-clip_model.cuda().eval()
-print("Model parameters:", f"{np.sum([int(np.prod(p.shape)) for p in clip_model.parameters()]):,}")
-print("Input resolution:", clip_model.visual.input_resolution)
-print("Context length:", clip_model.context_length)
-print("Vocab size:", clip_model.vocab_size)
-def encode_text(text):
-  return clip_model.encode_text(text)
