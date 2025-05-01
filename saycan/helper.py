@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from constants import PICK_TARGETS, PLACE_TARGETS, PIXEL_SIZE, BOUNDS
 from heapq import nlargest
 import cv2
+import imageio
 
 def build_scene_description(found_objects, block_name="box", bowl_name="circle"):
   scene_description = f"objects = {found_objects}"
