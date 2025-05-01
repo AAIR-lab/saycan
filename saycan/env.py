@@ -2,30 +2,45 @@ import numpy as np
 import pybullet
 import os
 import pybullet_data
+
+import saycan
 from saycan.robo_gripper import Robotiq2F85
 from saycan.constants import *
 
 class PickPlaceEnv():
 
-  def __init__(self):
+  def __init__(self, enable_gui=False, enable_debug_viz=False):
     self.dt = 1/480
     self.sim_step = 0
 
     # Configure and start PyBullet.
     # python3 -m pybullet_utils.runServer
     # pybullet.connect(pybullet.SHARED_MEMORY)  # pybullet.GUI for local GUI.
-    pybullet.connect(pybullet.DIRECT)  # pybullet.GUI for local GUI.
-    pybullet.configureDebugVisualizer(pybullet.COV_ENABLE_GUI, 0)
+    
+    if enable_gui:
+      pybullet.connect(pybullet.GUI)
+    else:
+      pybullet.connect(pybullet.DIRECT)
+
+    pybullet.configureDebugVisualizer(pybullet.COV_ENABLE_GUI,
+      enable_debug_viz)
     pybullet.setPhysicsEngineParameter(enableFileCaching=0)
-    assets_path = os.path.dirname(os.path.abspath(""))
-    pybullet.setAdditionalSearchPath(assets_path)
-    pybullet.setAdditionalSearchPath(pybullet_data.getDataPath())
+
     pybullet.setTimeStep(self.dt)
 
-    self.home_joints = (np.pi / 2, -np.pi / 2, np.pi / 2, -np.pi / 2, 3 * np.pi / 2, 0)  # Joint angles: (J0, J1, J2, J3, J4, J5).
-    self.home_ee_euler = (np.pi, 0, np.pi)  # (RX, RY, RZ) rotation in Euler angles.
-    self.ee_link_id = 9  # Link ID of UR5 end effector.
-    self.tip_link_id = 10  # Link ID of gripper finger tips.
+    # Joint angles: (J0, J1, J2, J3, J4, J5).
+    self.home_joints = (np.pi / 2, 
+      -np.pi / 2, np.pi / 2, -np.pi / 2, 3 * np.pi / 2, 0)
+    
+    # (RX, RY, RZ) rotation in Euler angles.
+    self.home_ee_euler = (np.pi, 0, np.pi)  
+    
+    # Link ID of UR5 end effector.
+    self.ee_link_id = 9
+    
+    # Link ID of gripper finger tips.
+    self.tip_link_id = 10
+
     self.gripper = None
 
   def reset(self, config):
@@ -36,8 +51,12 @@ class PickPlaceEnv():
     # Temporarily disable rendering to load URDFs faster.
     pybullet.configureDebugVisualizer(pybullet.COV_ENABLE_RENDERING, 0)
 
-    # Add robot.
+    # Add the base plane
+    pybullet.setAdditionalSearchPath(pybullet_data.getDataPath())
     pybullet.loadURDF("plane.urdf", [0, 0, -0.001])
+
+    # Add robot.
+    pybullet.setAdditionalSearchPath(str(saycan.ASSETS_DIR))
     self.robot_id = pybullet.loadURDF("ur5e/ur5e.urdf", [0, 0, 0], flags=pybullet.URDF_USE_MATERIAL_COLORS_FROM_MTL)
     self.ghost_id = pybullet.loadURDF("ur5e/ur5e.urdf", [0, 0, -10])  # For forward kinematics.
     self.joint_ids = [pybullet.getJointInfo(self.robot_id, i) for i in range(pybullet.getNumJoints(self.robot_id))]
@@ -449,4 +468,20 @@ class PickPlaceEnv():
 
 if __name__ == "__main__":
 
-  env = PickPlaceEnv()
+  env = PickPlaceEnv(enable_gui=True)
+
+  EXAMPLE_CONFIG = {
+    "pick":  ["red block", "yellow block", "green block", "blue block"],
+    "place": ["red bowl"]
+  }
+
+  EXAMPLE_CONFIG_EVAL = {
+    "pick":  get_objects(["red", "blue", "green", "yellow", "cyan", "purple"],
+      "block"),
+    "place":  get_objects(["red", "blue"], "bowl")
+  }
+
+  # Loads the environment using the example config above.
+  _ = env.reset(EXAMPLE_CONFIG_EVAL)
+
+  pass

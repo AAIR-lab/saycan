@@ -1,4 +1,7 @@
 import numpy as np
+import matplotlib
+from matplotlib import colors
+
 #@markdown Global constants: pick and place objects, colors, workspace bounds
 
 PICK_TARGETS = {
@@ -13,7 +16,18 @@ COLORS = {
     "red":    (255/255,  87/255,  89/255, 255/255),
     "green":  (89/255,  169/255,  79/255, 255/255),
     "yellow": (237/255, 201/255,  72/255, 255/255),
+    "orange": colors.to_rgba(colors.TABLEAU_COLORS["tab:orange"]),
+    "purple": colors.to_rgba(colors.TABLEAU_COLORS["tab:purple"]),
+    "pink": colors.to_rgba(colors.TABLEAU_COLORS["tab:pink"]),
+    "cyan": colors.to_rgba(colors.TABLEAU_COLORS["tab:cyan"]),
+    "gray": colors.to_rgba(colors.TABLEAU_COLORS["tab:gray"]),
 }
+
+def get_objects(colors, object_type):
+
+  assert object_type == "block" or object_type == "bowl"
+  assert all([c in COLORS for c in colors])
+  return ["%s %s" % (c, object_type) for c in colors]
 
 PLACE_TARGETS = {
   "blue block": None,
@@ -39,27 +53,10 @@ BOUNDS = np.float32([[-0.3, 0.3], [-0.8, -0.2], [0, 0.15]])  # X Y Z
 
 
 #----------------------------------------VILD------------------------------------------
-category_names = ['blue block',
-                  'red block',
-                  'green block',
-                  'orange block',
-                  'yellow block',
-                  'purple block',
-                  'pink block',
-                  'cyan block',
-                  'brown block',
-                  'gray block',
+available_blocks = get_objects(COLORS.keys(), "block")
+available_bowls = get_objects(COLORS.keys(), "bowl")
 
-                  'blue bowl',
-                  'red bowl',
-                  'green bowl',
-                  'orange bowl',
-                  'yellow bowl',
-                  'purple bowl',
-                  'pink bowl',
-                  'cyan bowl',
-                  'brown bowl',
-                  'gray bowl']
+category_names = available_blocks + available_bowls
 image_path = 'tmp.jpg'
 
 #@markdown ViLD settings.
