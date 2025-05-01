@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from constants import PICK_TARGETS, PLACE_TARGETS, PIXEL_SIZE, BOUNDS
 from heapq import nlargest
-#@title Helper Functions
+import cv2
 
 def build_scene_description(found_objects, block_name="box", bowl_name="circle"):
   scene_description = f"objects = {found_objects}"
@@ -104,4 +104,11 @@ def xyz_to_pix(position, bounds=BOUNDS, pixel_size=PIXEL_SIZE):
   v = int(np.round((position[0] - bounds[0, 0]) / pixel_size))
   return (u, v)
 
-  
+def save_env_top_image(env, image_path, show=True):
+
+  img_top = env.get_camera_image_top()
+  img_top_rgb = cv2.cvtColor(img_top, cv2.COLOR_BGR2RGB)
+  imageio.imsave(image_path, img_top)
+
+  if show:
+    plt.imshow(img_top)
