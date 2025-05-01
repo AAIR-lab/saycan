@@ -54,17 +54,26 @@ FEW_SHOT_PROMPT = "\n".join(few_shot_context_lines)
 
 class Prompt:
 
-    def __init__(self, init_prompt=FEW_SHOT_PROMPT, separator="\n",
+    def __init__(self, task_string, 
+        init_prompt=FEW_SHOT_PROMPT, separator="\n",
         termination_string=TERMINATION_STRING):
 
         self.init_prompt = init_prompt
+        self.task_string = task_string
         self.separator = separator
-        self.prompt = init_prompt
+        self.prompt = init_prompt \
+            + self.separator \
+            + "# %s" % (task_string) \
+            + self.separator
+
         self.termination_string = termination_string
 
-    def append(self, text):
+    def append(self, text, add_separator=True):
 
-        self.prompt += self.separator + text
+        self.prompt += text
+
+        if add_separator:
+            self.prompt += self.separator
 
     def __str__(self):
 
