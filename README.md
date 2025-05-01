@@ -1,24 +1,42 @@
 # SayCan
-This is a repo to organize the official [ipynb](https://github.com/google-research/google-research/tree/master/saycan) implementation of SayCan ([Do As I Can, Not As I Say: Grounding Language in Robotic Affordances](https://arxiv.org/abs/2204.01691)) for easier further research. 
+This is a forked repo to organize the official [ipynb](https://github.com/google-research/google-research/tree/master/saycan) implementation of SayCan ([Do As I Can, Not As I Say: Grounding Language in Robotic Affordances](https://arxiv.org/abs/2204.01691)) for easier further research. 
+
+This fork enables a cli-like layer and also enables support
+for open-source llms like llama-3.1 supported via the transformers library.
+
+## Testing
+This repository has been tested to be working with Ubuntu 22.04.2 and
+pip3==20.2.3 on the conda environment (instructions below).
+
 
 ## 1. Setup Environment
 
-Clone this repo. Create and activate new conda environment with python 3.9. Run the following command.
+Clone this repo. Create and activate new conda environment with python 3.9 as
+follows.
 ```
-pip install -r requirements.txt
+conda create -n saycan python=3.9.1
+conda activate saycan
 ```
+
+### Downgrade pip and install all required packages
+```
+pip3 install pip==20.2.3
+pip3 install -r requirements.txt
+```
+
+### For using open-source models
+Ensure that you setup vllm and register your huggingface token.
 
 ## 2. Download relevant data
 
 ### 2.1 Download PyBullet assets.
 ```
-  gdown --id 1Cc_fDSBL6QiDvNT4dpfAEbhbALSVoWcc
-  gdown --id 1yOMEm-Zp_DL3nItG9RozPeJAmeOldekX
-  gdown --id 1GsqNLhEl9dd4Mc3BM0dX3MibOI1FVWNM
+  gdown 1Cc_fDSBL6QiDvNT4dpfAEbhbALSVoWcc
+  gdown 1yOMEm-Zp_DL3nItG9RozPeJAmeOldekX
+  gdown 1GsqNLhEl9dd4Mc3BM0dX3MibOI1FVWNM
   unzip ur5e.zip
   unzip robotiq_2f_85.zip
   unzip bowl.zip
-
 ```
 ### 2.2 Download ViLD pretrained model weights.
 ```
@@ -30,11 +48,11 @@ You can skip this process if you want to generate data by yourself with `gen_dat
 Download pregenerated dataset by running
 
 ```
-gdown --id 1yCz6C-6eLWb4SFYKdkM-wz5tlMjbG2h8
+gdown 1yCz6C-6eLWb4SFYKdkM-wz5tlMjbG2h8
 ```
 ### 2.4 Download pretrained low-level policy.
 ```
-gdown --id 1Nq0q1KbqHOA5O7aRSu4u7-u27EMMXqgP
+gdown 1Nq0q1KbqHOA5O7aRSu4u7-u27EMMXqgP
 ```
 
 ### 3. You are all set!
