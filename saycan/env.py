@@ -9,7 +9,10 @@ from saycan.constants import *
 
 class PickPlaceEnv():
 
-  def __init__(self, enable_gui=False, enable_debug_viz=False):
+  def __init__(self, config, enable_gui=False, enable_debug_viz=False):
+    
+    self.config = config
+    
     self.dt = 1/480
     self.sim_step = 0
 
@@ -43,7 +46,27 @@ class PickPlaceEnv():
 
     self.gripper = None
 
-  def reset(self, config):
+    # Info to store the state ids
+    self.state_ids = set()
+    self.init_state_id = None
+
+  def reset(self):
+
+    # Restore to the initial state.
+    # A new random state will require a new "simulator instance"
+    # TODO: Add a force function to take a config, remove all stored states
+    #   and start affresh?
+    if len(self.state_ids) == 0:
+      assert self.init_state_id is None
+
+      self.initialize_initial_state()
+      state_id = pybullet.saveState()
+      self.state_ids.add(state_id)
+      self.init_state_id = state_id
+    else:
+      pybullet.restoreState(self.init_state_id)
+
+  def initialize_initial_state(self):
     pybullet.resetSimulation(pybullet.RESET_USE_DEFORMABLE_WORLD)
     pybullet.setGravity(0, 0, -9.8)
     self.cache_video = []
@@ -80,7 +103,6 @@ class PickPlaceEnv():
     pybullet.changeVisualShape(plane_id, -1, rgbaColor=[0.2, 0.2, 0.2, 1.0])
 
     # Load objects according to config.
-    self.config = config
     self.obj_name_to_id = {}
     obj_names = list(self.config["pick"]) + list(self.config["place"])
     obj_xyz = np.zeros((0, 3))
@@ -468,8 +490,6 @@ class PickPlaceEnv():
 
 if __name__ == "__main__":
 
-  env = PickPlaceEnv(enable_gui=True)
-
   EXAMPLE_CONFIG = {
     "pick":  ["red block", "yellow block", "green block", "blue block"],
     "place": ["red bowl"]
@@ -481,7 +501,9 @@ if __name__ == "__main__":
     "place":  get_objects(["red", "blue"], "bowl")
   }
 
+  env = PickPlaceEnv(EXAMPLE_CONFIG_EVAL, enable_gui=True)
+
   # Loads the environment using the example config above.
-  _ = env.reset(EXAMPLE_CONFIG_EVAL)
+  _ = env.reset()
 
   pass
