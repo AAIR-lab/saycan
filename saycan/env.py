@@ -447,3 +447,7 @@ class PickPlaceEnv():
     xyzmap = xyzmap[::-1, :, :]  # Flip up-down.
     heightmap = heightmap[::-1, :]  # Flip up-down.
     return heightmap, colormap, xyzmap
+
+if __name__ == "__main__":
+
+  env = PickPlaceEnv()
