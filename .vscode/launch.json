@@ -13,6 +13,17 @@
             "env": {
                 "PYTHONPATH": ".:$PYTHONPATH"
             }
+        },
+
+        {
+            "name": "saycan-demo",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "saycan/alg.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": ".:$PYTHONPATH"
+            }
         }
     ]
 }
