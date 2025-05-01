@@ -2,9 +2,8 @@ import numpy as np
 import pybullet
 import os
 import pybullet_data
-from robo_gripper import Robotiq2F85
-from constants import *
-#@markdown Gym-style environment code
+from saycan.robo_gripper import Robotiq2F85
+from saycan.constants import *
 
 class PickPlaceEnv():
 
