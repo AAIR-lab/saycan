@@ -747,6 +747,7 @@ def vild(session, image_path, category_name_string, params, plot_on=True, prompt
   #################################################################
   # Print found_objects
   found_objects = []
+  found_scores = []
   for a, b in prompt_swaps:
     category_names = [name.replace(b, a) for name in category_names]  # Extra prompt engineering.
   for anno_idx in indices[0:int(rescaled_detection_boxes.shape[0])]:
@@ -756,10 +757,10 @@ def vild(session, image_path, category_name_string, params, plot_on=True, prompt
     found_object = category_names[np.argmax(scores)]
     if found_object == "background":
       continue
-    print("Found a", found_object, "with score:", np.max(scores))
     found_objects.append(category_names[np.argmax(scores)])
+    found_scores.append(np.max(scores))
 
-  return found_objects
+  return found_objects, found_scores
   #################################################################
   # Plot detected boxes on the input image.
   ymin, xmin, ymax, xmax = np.split(rescaled_detection_boxes, 4, axis=-1)
