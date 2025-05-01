@@ -79,5 +79,4 @@ def make_options(pick_targets=None, place_targets=None, options_in_api_form=True
       options.append(option)
 
   options.append(termination_string)
-  print("Considering", len(options), "options")
   return options
