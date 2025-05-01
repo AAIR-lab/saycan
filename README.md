@@ -28,19 +28,26 @@ pip3 install -r requirements.txt
 Ensure that you setup vllm and register your huggingface token.
 
 ## 2. Download relevant data
+The instructions below try downloading from official sources. If there are
+any problems there, I also host the assets/ directory via this shared [link](https://arizonastateu-my.sharepoint.com/:u:/g/personal/rkaria_sundevils_asu_edu/Ea0EWvHawsxJgAQ5Zp-dVk8BqRGcds9B7onbQ--wu1OEVg?e=Hm9dZn).
+Simply download it and unzip it in the project root directory: `saycan.ROOT_DIR`
+
+If you still have issues (eg. broken links), email me by finding my email on
+my personal webpage [rushangkaria.github.io](https://rushangkaria.github.io)
 
 ### 2.1 Download PyBullet assets.
 ```
-  gdown 1Cc_fDSBL6QiDvNT4dpfAEbhbALSVoWcc
-  gdown 1yOMEm-Zp_DL3nItG9RozPeJAmeOldekX
-  gdown 1GsqNLhEl9dd4Mc3BM0dX3MibOI1FVWNM
-  unzip ur5e.zip
-  unzip robotiq_2f_85.zip
-  unzip bowl.zip
+mkdir assets/
+gdown -O assets/ 1Cc_fDSBL6QiDvNT4dpfAEbhbALSVoWcc
+gdown -O assets/ 1yOMEm-Zp_DL3nItG9RozPeJAmeOldekX
+gdown -O assets/ 1GsqNLhEl9dd4Mc3BM0dX3MibOI1FVWNM
+unzip assets/ur5e.zip -d assets/
+unzip assets/robotiq_2f_85.zip -d assets/
+unzip assets/bowl.zip -d assets/
 ```
 ### 2.2 Download ViLD pretrained model weights.
 ```
-gsutil cp -r gs://cloud-tpu-checkpoints/detection/projects/vild/colab/image_path_v2 ./
+gsutil cp -r gs://cloud-tpu-checkpoints/detection/projects/vild/colab/image_path_v2 assets/
 ```
 
 ### 2.3 Download pregenerated dataset.
@@ -48,11 +55,11 @@ You can skip this process if you want to generate data by yourself with `gen_dat
 Download pregenerated dataset by running
 
 ```
-gdown 1yCz6C-6eLWb4SFYKdkM-wz5tlMjbG2h8
+gdown -O assets/ 1yCz6C-6eLWb4SFYKdkM-wz5tlMjbG2h8
 ```
 ### 2.4 Download pretrained low-level policy.
 ```
-gdown 1Nq0q1KbqHOA5O7aRSu4u7-u27EMMXqgP
+gdown -O assets/ 1Nq0q1KbqHOA5O7aRSu4u7-u27EMMXqgP
 ```
 
 ### 3. You are all set!
