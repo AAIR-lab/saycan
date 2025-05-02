@@ -6,6 +6,8 @@ import pybullet_data
 import saycan
 from saycan.robo_gripper import Robotiq2F85
 from saycan.constants import *
+from collections import defaultdict
+from moviepy.editor import ImageSequenceClip
 
 class PickPlaceEnv():
 
@@ -66,10 +68,35 @@ class PickPlaceEnv():
     else:
       pybullet.restoreState(self.init_state_id)
 
+  def set_state(self, state):
+
+    assert isinstance(state, int)
+    assert state in self.state_ids
+    pybullet.restoreState(state)
+
+  def get_state(self):
+
+    return self.get_observation()
+
+  def reset_cache_video(self):
+
+    self.cache_video = defaultdict(list)
+    self.current_step = 0
+
+  def save_video(self, filepath, steps, fps=25):
+
+    video_stream = []
+    for step in steps:
+      video_stream += self.cache_video[step]
+
+    video_clip = ImageSequenceClip(video_stream, fps=fps)
+    video_clip.write_videofile(filepath, fps=fps)
+
   def initialize_initial_state(self):
     pybullet.resetSimulation(pybullet.RESET_USE_DEFORMABLE_WORLD)
     pybullet.setGravity(0, 0, -9.8)
-    self.cache_video = []
+    
+    self.reset_cache_video()
 
     # Temporarily disable rendering to load URDFs faster.
     pybullet.configureDebugVisualizer(pybullet.COV_ENABLE_RENDERING, 0)
@@ -222,6 +249,7 @@ class PickPlaceEnv():
     reward = self.get_reward()
     done = False
     info = {}
+    self.current_step += 1
     return observation, reward, done, info
 
   def set_alpha_transparency(self, alpha: float) -> None:
@@ -241,7 +269,7 @@ class PickPlaceEnv():
 
     # Render current image at 8 FPS.
     if self.sim_step % 60 == 0:
-      self.cache_video.append(self.get_camera_image())
+      self.cache_video[self.current_step].append(self.get_camera_image())
 
   def get_camera_image(self):
     image_size = (240, 240)
