@@ -12,10 +12,10 @@ def build_scene_description(found_objects, block_name="box", bowl_name="circle")
   scene_description = scene_description.replace("'", "")
   return scene_description
 
-def step_to_nlp(step):
-  step = step.replace("robot.pick_and_place(", "")
-  step = step.replace(")", "")
-  pick, place = step.split(", ")
+def convert_action_to_cliport_action(action):
+  action = action.replace("robot.pick_and_place(", "")
+  action = action.replace(")", "")
+  pick, place = action.split(", ")
   return "Pick the " + pick + " and place it on the " + place + "."
 
 def normalize_scores(scores):
