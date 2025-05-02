@@ -51,14 +51,15 @@ class SayCan:
 
         if saycan.VERBOSITY >= 2:
             print("SayCan: Object detection on init state")
-            for found_object, score in zip(found_objects, scores):
+            for found_object, score in zip(self.found_objects, scores):
                 print("Found a", found_object, "with score:", score)
 
-        self.scene_description = helper.build_scene_description(found_objects)
+        self.scene_description = helper.build_scene_description(
+            self.found_objects)
 
         if saycan.VERBOSITY >= 2:
             print("SayCan scene description")
-            print(scene_description)
+            print(self.scene_description)
 
         self.affordance_scores = helper.affordance_scoring(self.actions,
             self.found_objects, block_name="box", bowl_name="circle",
