@@ -16,10 +16,13 @@ from constants import coords
 from model import TransporterNets, eval_step
 import jax
 import jax.numpy as jnp
-from moviepy.editor import ImageSequenceClip
 import IPython
 from IPython.display import display
 from saycan.clip_model import CLIPModel
+import flax
+import os
+from flax.training import checkpoints
+from saycan import model
 
 STANDARD_COLORS = ["White"]
 # STANDARD_COLORS = [
@@ -159,7 +162,7 @@ def get_vild_optimizer(checkpoint_dir=saycan.ASSETS_DIR, seed=0,
   assert os.path.exists(ckpt_path)
   optimizer = checkpoints.restore_checkpoint(ckpt_path, optimizer)
 
-  return optimizer, n_params(init_params)
+  return optimizer, model.n_params(init_params)
 
 
 def article(name):
@@ -796,7 +799,8 @@ def vild(session, image_path, category_name_string, params, plot_on=True, prompt
 
 
 # Show camera image before pick and place.
-def run_cliport(optim, env, obs, text, video_path="tmp.mp4", show_state=False):
+def run_cliport(output_dir, optim, env, obs, text):
+
   before = env.get_camera_image()
   prev_obs = obs['image'].copy()
 
@@ -832,38 +836,30 @@ def run_cliport(optim, env, obs, text, video_path="tmp.mp4", show_state=False):
   act = {'pick': pick_xyz, 'place': place_xyz}
   obs, _, _, _ = env.step(act)
 
-  if show_state:
-    # Show pick and place action.
-    plt.title(text)
-    plt.imshow(prev_obs)
-    plt.arrow(pick_yx[1], pick_yx[0], place_yx[1]-pick_yx[1], place_yx[0]-pick_yx[0], color='w', head_starts_at_zero=False, head_width=7, length_includes_head=True)
-    plt.show()
+  # Show pick and place action.
+  plt.title(text)
+  plt.imshow(prev_obs)
+  plt.arrow(pick_yx[1], pick_yx[0], place_yx[1]-pick_yx[1], place_yx[0]-pick_yx[0], color='w', head_starts_at_zero=False, head_width=7, length_includes_head=True)
+  plt.savefig("%s/s.png" % (output_dir))
 
-    # Show debug plots.
-    plt.subplot(1, 2, 1)
-    plt.title('Pick Heatmap')
-    plt.imshow(pick_map.reshape(224, 224))
-    plt.subplot(1, 2, 2)
-    plt.title('Place Heatmap')
-    plt.imshow(place_map.reshape(224, 224))
-    plt.show()
+  # Show debug plots.
+  plt.subplot(1, 2, 1)
+  plt.title('Pick Heatmap')
+  plt.imshow(pick_map.reshape(224, 224))
+  plt.subplot(1, 2, 2)
+  plt.title('Place Heatmap')
+  plt.imshow(place_map.reshape(224, 224))
+  plt.savefig("%s/action_heatmap.png" % (output_dir))
 
-  # Show video of environment rollout.
-  debug_clip = ImageSequenceClip(env.cache_video, fps=25)
-  debug_clip.write_videofile(video_path, fps=25)
-  # display(debug_clip.ipython_display(autoplay=1, loop=1, center=False))
-  env.cache_video = []
-
-  if show_state:
-    # Show camera image after pick and place.
-    plt.subplot(1, 2, 1)
-    plt.title('Before')
-    plt.imshow(before)
-    plt.subplot(1, 2, 2)
-    plt.title('After')
-    after = env.get_camera_image()
-    plt.imshow(after)
-    plt.show()
+  # Show camera image after pick and place.
+  plt.subplot(1, 2, 1)
+  plt.title('Before')
+  plt.imshow(before)
+  plt.subplot(1, 2, 2)
+  plt.title('After')
+  after = env.get_camera_image()
+  plt.imshow(after)
+  plt.savefig("%s/s_dash.png" % (output_dir))
 
   # return pick_xyz, place_xyz, pick_map, place_map, pick_yx, place_yx
   return obs
