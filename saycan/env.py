@@ -51,6 +51,7 @@ class PickPlaceEnv():
     # Info to store the state ids
     self.state_ids = set()
     self.init_state_id = None
+    self.current_state = None
 
   def reset(self):
 
@@ -60,13 +61,13 @@ class PickPlaceEnv():
     #   and start affresh?
     if len(self.state_ids) == 0:
       assert self.init_state_id is None
-
       self.initialize_initial_state()
-      state_id = pybullet.saveState()
-      self.state_ids.add(state_id)
-      self.init_state_id = state_id
+      self.init_state_id = self.save_state()
     else:
       pybullet.restoreState(self.init_state_id)
+
+    self.current_state = self.init_state_id
+    return self.get_observation()
 
   def set_state(self, state):
 
@@ -77,6 +78,12 @@ class PickPlaceEnv():
   def get_state(self):
 
     return self.get_observation()
+
+  def save_state(self):
+
+      state_id = pybullet.saveState()
+      self.state_ids.add(state_id)
+      return state_id
 
   def reset_cache_video(self):
 
@@ -250,6 +257,7 @@ class PickPlaceEnv():
     done = False
     info = {}
     self.current_step += 1
+    self.current_state = self.save_state()
     return observation, reward, done, info
 
   def set_alpha_transparency(self, alpha: float) -> None:
