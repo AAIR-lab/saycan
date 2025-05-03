@@ -71,13 +71,27 @@ class PickPlaceEnv():
 
   def set_state(self, state):
 
-    assert isinstance(state, int)
-    assert state in self.state_ids
-    pybullet.restoreState(state)
+    assert isinstance(state, State)
+    assert state.index in self.state_ids
+    pybullet.restoreState(state.index)
+
+  def get_body_info(self, name, obj_id):
+
+      position, orientation = pybullet.getBasePositionAndOrientation(obj_id)
+      linear_vel, angular_vel = pybullet.getBaseVelocity(obj_id)
+      joints = []
+      for joint_id in range(pybullet.getNumJoints(obj_id)):
+        joints.append(pybullet.getJointState(obj_id, joint_id))
+
+      return BodyInfo(name=name, position=position, orientation=orientation)
 
   def get_state(self):
 
-    return self.get_observation()
+    body_infos = []
+    for obj_name, obj_id in self.obj_name_to_id.items():
+      body_infos.append(self.get_body_info(obj_name, obj_id))
+    
+    return State(index=self.current_state, body_infos=body_infos)
 
   def save_state(self):
 
@@ -542,4 +556,5 @@ if __name__ == "__main__":
   # Loads the environment using the example config above.
   _ = env.reset()
 
+  state = env.get_state()
   pass

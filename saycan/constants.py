@@ -2,6 +2,20 @@ import numpy as np
 import matplotlib
 from matplotlib import colors
 
+from pydantic import BaseModel
+from typing import Tuple, List
+
+class BodyInfo(BaseModel):
+
+  name: str
+  position: Tuple[float, ...]
+  orientation: Tuple[float, ...]
+
+class State(BaseModel):
+
+  index: int
+  body_infos: List[BodyInfo]
+
 #@markdown Global constants: pick and place objects, colors, workspace bounds
 
 PICK_TARGETS = {
