@@ -10,6 +10,7 @@ import time
 import os
 import tensorflow.compat.v1 as tf
 import tempfile
+import pickle
 
 class SayCan:
 
@@ -106,6 +107,11 @@ class SayCan:
 
         return high_level_actions
 
+    def write_state_to_file(self, filepath):
+
+        with open(filepath, "wb") as fh:
+            pickle.dump(self.env.get_state(), fh)
+
     def execute_plan(self, output_dir, plan,
         state=None, store_video=True):
 
@@ -113,6 +119,8 @@ class SayCan:
 
         with open("%s/plan.txt" % (output_dir), "w") as fh:
             fh.write("\n".join(plan))
+
+        self.write_state_to_file("%s/state.pkl" % (output_dir))
 
         if state is None:
             self.env.set_state(self.env.init_state_id)
@@ -127,10 +135,12 @@ class SayCan:
             step_dir = "%s/step-%u_%s" % (output_dir, i, action)
             os.makedirs(step_dir, exist_ok=True)
             
-            obs = self.env.get_state()
+            obs = self.env.get_observation()
             nlp_action = helper.convert_action_to_cliport_action(action)
             vild.run_cliport(step_dir, self.optimizer, self.env, obs,
                 nlp_action)
+
+            self.write_state_to_file("%s/state.pkl" % (step_dir))
 
             if store_video:
                 step_video_filepath = "%s/step_execution.mp4" % (step_dir)
@@ -164,7 +174,7 @@ if __name__ == "__main__":
     # from jax.lib import xla_bridge
     # print("Using CPU/GPU:", xla_bridge.get_backend().platform)
 
-    env = PickPlaceEnv(TASK_CONFIG)
+    env = PickPlaceEnv(TASK_CONFIG, enable_gui=True)
     _ = env.reset()
     saycan_obj = SayCan(env)
 
