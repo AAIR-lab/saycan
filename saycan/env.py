@@ -75,7 +75,7 @@ class PickPlaceEnv():
     assert state.index in self.state_ids
     pybullet.restoreState(state.index)
 
-  def get_body_info(self, name, obj_id):
+  def get_body_info(self, obj_id):
 
       position, orientation = pybullet.getBasePositionAndOrientation(obj_id)
       linear_vel, angular_vel = pybullet.getBaseVelocity(obj_id)
@@ -83,13 +83,13 @@ class PickPlaceEnv():
       for joint_id in range(pybullet.getNumJoints(obj_id)):
         joints.append(pybullet.getJointState(obj_id, joint_id))
 
-      return BodyInfo(name=name, position=position, orientation=orientation)
+      return BodyInfo(position=position, orientation=orientation)
 
   def get_state(self):
 
     body_infos = []
     for obj_name, obj_id in self.obj_name_to_id.items():
-      body_infos.append(self.get_body_info(obj_name, obj_id))
+      body_infos[obj_name] = self.get_body_info(obj_id)
     
     return State(index=self.current_state, body_infos=body_infos)
 

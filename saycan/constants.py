@@ -3,18 +3,17 @@ import matplotlib
 from matplotlib import colors
 
 from pydantic import BaseModel
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 
 class BodyInfo(BaseModel):
 
-  name: str
   position: Tuple[float, ...]
   orientation: Tuple[float, ...]
 
 class State(BaseModel):
 
   index: int
-  body_infos: List[BodyInfo]
+  body_infos: Dict[BodyInfo]
 
 #@markdown Global constants: pick and place objects, colors, workspace bounds
 
