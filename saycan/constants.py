@@ -13,7 +13,7 @@ class BodyInfo(BaseModel):
 class State(BaseModel):
 
   index: int
-  body_infos: Dict[BodyInfo]
+  body_infos: Dict[str, BodyInfo]
 
 #@markdown Global constants: pick and place objects, colors, workspace bounds
 

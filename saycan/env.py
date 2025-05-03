@@ -87,7 +87,7 @@ class PickPlaceEnv():
 
   def get_state(self):
 
-    body_infos = []
+    body_infos = dict()
     for obj_name, obj_id in self.obj_name_to_id.items():
       body_infos[obj_name] = self.get_body_info(obj_id)
     
