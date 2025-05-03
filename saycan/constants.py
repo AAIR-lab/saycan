@@ -64,6 +64,11 @@ PLACE_TARGETS = {
 PIXEL_SIZE = 0.00267857
 BOUNDS = np.float32([[-0.3, 0.3], [-0.8, -0.2], [0, 0.15]])  # X Y Z
 
+# The thickness of the table
+TABLE_THICKNESS = 0.002
+
+# The length of one side of the square block
+BLOCK_LENGTH = 0.04
 
 #----------------------------------------VILD------------------------------------------
 available_blocks = get_objects(COLORS.keys(), "block")

@@ -145,8 +145,10 @@ class PickPlaceEnv():
     self.gripper.release()
 
     # Add workspace.
-    plane_shape = pybullet.createCollisionShape(pybullet.GEOM_BOX, halfExtents=[0.3, 0.3, 0.001])
-    plane_visual = pybullet.createVisualShape(pybullet.GEOM_BOX, halfExtents=[0.3, 0.3, 0.001])
+    plane_shape = pybullet.createCollisionShape(pybullet.GEOM_BOX,
+      halfExtents=[0.3, 0.3, TABLE_THICKNESS / 2])
+    plane_visual = pybullet.createVisualShape(pybullet.GEOM_BOX,
+      halfExtents=[0.3, 0.3, TABLE_THICKNESS / 2])
     plane_id = pybullet.createMultiBody(0, plane_shape, plane_visual, basePosition=[0, -0.5, 0])
     pybullet.changeVisualShape(plane_id, -1, rgbaColor=[0.2, 0.2, 0.2, 1.0])
 
@@ -175,8 +177,10 @@ class PickPlaceEnv():
         object_type = obj_name.split(" ")[1]
         object_position = rand_xyz.squeeze()
         if object_type == "block":
-          object_shape = pybullet.createCollisionShape(pybullet.GEOM_BOX, halfExtents=[0.02, 0.02, 0.02])
-          object_visual = pybullet.createVisualShape(pybullet.GEOM_BOX, halfExtents=[0.02, 0.02, 0.02])
+          object_shape = pybullet.createCollisionShape(pybullet.GEOM_BOX,
+            halfExtents=[BLOCK_LENGTH / 2, BLOCK_LENGTH / 2, BLOCK_LENGTH / 2])
+          object_visual = pybullet.createVisualShape(pybullet.GEOM_BOX,
+            halfExtents=[BLOCK_LENGTH / 2, BLOCK_LENGTH / 2, BLOCK_LENGTH / 2])
           object_id = pybullet.createMultiBody(0.01, object_shape, object_visual, basePosition=object_position)
         elif object_type == "bowl":
           object_position[2] = 0
