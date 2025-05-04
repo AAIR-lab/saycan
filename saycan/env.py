@@ -50,7 +50,8 @@ class PickPlaceEnv():
 
     # Info to store the state ids
     self.state_ids = set()
-    self.init_state_id = None
+    self.current_state_index = None
+    self.init_state = None
     self.current_state = None
 
   def reset(self):
@@ -60,14 +61,19 @@ class PickPlaceEnv():
     # TODO: Add a force function to take a config, remove all stored states
     #   and start affresh?
     if len(self.state_ids) == 0:
-      assert self.init_state_id is None
+      assert self.init_state is None
       self.initialize_initial_state()
-      self.init_state_id = self.save_state()
+      self.init_state = self.get_state()
     else:
-      pybullet.restoreState(self.init_state_id)
+      pybullet.restoreState(self.init_state.index)
 
-    self.current_state = self.init_state_id
+    self.current_state = self.init_state
     return self.get_observation()
+
+  def update_current_state(self):
+
+    self.current_state_index = self.save_state()
+    self.current_state = self.get_state()
 
   def set_state(self, state):
 
@@ -91,7 +97,7 @@ class PickPlaceEnv():
     for obj_name, obj_id in self.obj_name_to_id.items():
       body_infos[obj_name] = self.get_body_info(obj_id)
     
-    return State(index=self.current_state, body_infos=body_infos)
+    return State(index=self.current_state_index, body_infos=body_infos)
 
   def save_state(self):
 
@@ -193,6 +199,8 @@ class PickPlaceEnv():
 
     for _ in range(200):
       pybullet.stepSimulation()
+
+    self.update_current_state()
     return self.get_observation()
 
   def servoj(self, joints):
@@ -275,7 +283,8 @@ class PickPlaceEnv():
     done = False
     info = {}
     self.current_step += 1
-    self.current_state = self.save_state()
+
+    self.update_current_state()
     return observation, reward, done, info
 
   def set_alpha_transparency(self, alpha: float) -> None:

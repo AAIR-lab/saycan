@@ -73,7 +73,7 @@ class SayCan:
         self.initialize_vild_and_compute_affordances(output_dir)
 
         if state is None:
-            self.env.set_state(self.env.init_state_id)
+            self.env.set_state(self.env.init_state)
 
         image_path = "%s/saycan_init_s.png" % (output_dir)
         helper.save_env_top_image(self.env, image_path, show=False)
@@ -123,7 +123,7 @@ class SayCan:
         self.write_state_to_file("%s/state.pkl" % (output_dir))
 
         if state is None:
-            self.env.set_state(self.env.init_state_id)
+            self.env.set_state(self.env.init_state)
         
         steps = []
         for i, action in enumerate(plan):
@@ -206,5 +206,5 @@ if __name__ == "__main__":
     # ]
     # plan = DUMMY_PLAN
 
-    saycan_obj.execute_plan(OUTPUT_DIR, plan, "/tmp/results")
+    saycan_obj.execute_plan(OUTPUT_DIR, plan)
 
