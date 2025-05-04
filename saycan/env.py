@@ -105,9 +105,10 @@ class PickPlaceEnv():
       self.state_ids.add(state_id)
       return state_id
 
-  def reset_cache_video(self):
+  def reset_caches(self):
 
     self.cache_video = defaultdict(list)
+    self.state_sequence = [self.get_state()]
     self.current_step = 0
 
   def save_video(self, filepath, steps, fps=25):
@@ -123,8 +124,6 @@ class PickPlaceEnv():
     pybullet.resetSimulation(pybullet.RESET_USE_DEFORMABLE_WORLD)
     pybullet.setGravity(0, 0, -9.8)
     
-    self.reset_cache_video()
-
     # Temporarily disable rendering to load URDFs faster.
     pybullet.configureDebugVisualizer(pybullet.COV_ENABLE_RENDERING, 0)
 
@@ -201,6 +200,8 @@ class PickPlaceEnv():
       pybullet.stepSimulation()
 
     self.update_current_state()
+    self.reset_caches()
+
     return self.get_observation()
 
   def servoj(self, joints):
@@ -305,6 +306,9 @@ class PickPlaceEnv():
     # Render current image at 8 FPS.
     if self.sim_step % 60 == 0:
       self.cache_video[self.current_step].append(self.get_camera_image())
+
+      self.update_current_state()
+      self.state_sequence.append(self.current_state)
 
   def get_camera_image(self):
     image_size = (240, 240)

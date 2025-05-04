@@ -126,6 +126,8 @@ class SayCan:
             self.env.set_state(self.env.init_state)
         
         steps = []
+        assert len(self.env.state_sequence) == 1
+        actions = [None]
         for i, action in enumerate(plan):
 
             if action == prompt.TERMINATION_STRING:
@@ -140,6 +142,8 @@ class SayCan:
             vild.run_cliport(step_dir, self.optimizer, self.env, obs,
                 nlp_action)
 
+            actions += [action] * (len(self.env.state_sequence) - len(actions))
+
             self.write_state_to_file("%s/state.pkl" % (step_dir))
 
             if store_video:
@@ -149,6 +153,8 @@ class SayCan:
         if store_video and len(steps) > 0:
             execution_filepath = "%s/plan_execution.mp4" % (output_dir)
             self.env.save_video(execution_filepath,  range(len(steps)))
+
+        return self.env.state_sequence, actions
 
 if __name__ == "__main__":
 
@@ -206,6 +212,7 @@ if __name__ == "__main__":
     # ]
     # plan = DUMMY_PLAN
 
+    env.reset_caches()
     saycan_obj.execute_plan(OUTPUT_DIR, plan)
 
 
