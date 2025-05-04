@@ -1,5 +1,5 @@
 import openai
-from constants import *
+from saycan.constants import *
 import clip
 from transformers import AutoTokenizer
 

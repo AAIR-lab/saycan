@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from constants import PICK_TARGETS, PLACE_TARGETS, PIXEL_SIZE, BOUNDS
+from saycan.constants import PICK_TARGETS, PLACE_TARGETS, PIXEL_SIZE, BOUNDS
 from heapq import nlargest
 import cv2
 import imageio

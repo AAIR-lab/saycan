@@ -8,7 +8,7 @@ from flax import linen as nn
 import jax
 import jax.numpy as jnp
 import optax
-from constants import PICK_TARGETS, PLACE_TARGETS
+from saycan.constants import PICK_TARGETS, PLACE_TARGETS
 # Expert policy
 class ScriptedPolicy():
 

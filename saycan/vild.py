@@ -12,8 +12,8 @@ import clip
 import cv2
 import collections
 import matplotlib.pyplot as plt
-from constants import coords
-from model import TransporterNets, eval_step
+from saycan.constants import coords
+from saycan.model import TransporterNets, eval_step, n_params
 import jax
 import jax.numpy as jnp
 import IPython
@@ -22,7 +22,6 @@ from saycan.clip_model import CLIPModel
 import flax
 import os
 from flax.training import checkpoints
-from saycan import model
 
 STANDARD_COLORS = ["White"]
 # STANDARD_COLORS = [
@@ -162,7 +161,7 @@ def get_vild_optimizer(checkpoint_dir=saycan.ASSETS_DIR, seed=0,
   assert os.path.exists(ckpt_path)
   optimizer = checkpoints.restore_checkpoint(ckpt_path, optimizer)
 
-  return optimizer, model.n_params(init_params)
+  return optimizer, n_params(init_params)
 
 
 def article(name):
