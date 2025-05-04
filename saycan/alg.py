@@ -146,7 +146,7 @@ class SayCan:
                 step_video_filepath = "%s/step_execution.mp4" % (step_dir)
                 self.env.save_video(step_video_filepath, [i])
 
-        if store_video:
+        if store_video and len(steps) > 0:
             execution_filepath = "%s/plan_execution.mp4" % (output_dir)
             self.env.save_video(execution_filepath,  range(len(steps)))
 
@@ -207,4 +207,5 @@ if __name__ == "__main__":
     # plan = DUMMY_PLAN
 
     saycan_obj.execute_plan(OUTPUT_DIR, plan)
+
 
