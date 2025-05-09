@@ -38,6 +38,10 @@ class SayCan:
             print("SayCan is considering", len(self.actions), "actions")
             print(f'ViLD parameters: {num_params:,}')
     
+    def get_action_space(self):
+
+        return constants.SayCanActionSpace(actions=self.actions)
+
     def initialize_vild_and_compute_affordances(self, output_dir):
 
         if self.found_objects is not None:

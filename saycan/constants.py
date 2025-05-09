@@ -15,6 +15,10 @@ class State(BaseModel):
   index: int
   body_infos: Dict[str, BodyInfo]
 
+class SayCanActionSpace(BaseModel):
+
+  actions: List[str]
+
 #@markdown Global constants: pick and place objects, colors, workspace bounds
 
 PICK_TARGETS = {
