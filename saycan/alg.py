@@ -72,8 +72,9 @@ class SayCan:
         os.makedirs(output_dir, exist_ok=True)
         self.initialize_vild_and_compute_affordances(output_dir)
 
-        if state is None:
-            self.env.set_state(self.env.init_state)
+        if state is not None:
+            assert isinstance(state, constants.State)
+            self.env.set_state(self.state)
 
         image_path = "%s/saycan_init_s.png" % (output_dir)
         helper.save_env_top_image(self.env, image_path, show=False)
@@ -122,8 +123,9 @@ class SayCan:
 
         self.write_state_to_file("%s/state.pkl" % (output_dir))
 
-        if state is None:
-            self.env.set_state(self.env.init_state)
+        if state is not None:
+            assert isinstance(state, constants.State)
+            self.env.set_state(state)
         
         steps = []
         assert len(self.env.state_sequence) == 1
