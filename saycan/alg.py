@@ -156,7 +156,14 @@ class SayCan:
             execution_filepath = "%s/plan_execution.mp4" % (output_dir)
             self.env.save_video(execution_filepath,  range(len(steps)))
 
-        return self.env.state_sequence, actions
+
+        state_sequence = self.env.state_sequence[:]
+
+        # Reset the caches since we want to save state sequences only
+        # for single executions
+        self.env.reset_caches()
+
+        return state_sequence, actions
 
 if __name__ == "__main__":
 
