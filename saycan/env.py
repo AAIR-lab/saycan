@@ -53,6 +53,7 @@ class PickPlaceEnv():
     self.current_state_index = None
     self.init_state = None
     self.current_state = None
+    self.MAX_CACHE_LENGTH = 4
 
   def reset(self):
 
@@ -285,7 +286,7 @@ class PickPlaceEnv():
     info = {}
     self.current_step += 1
 
-    self.update_current_state()
+    self.cache_store_and_update(True)
     return observation, reward, done, info
 
   def set_alpha_transparency(self, alpha: float) -> None:
@@ -299,16 +300,22 @@ class PickPlaceEnv():
         pybullet.changeVisualShape(
             self.gripper.body, linkIndex=i, rgbaColor=rgba_color)
 
-  def step_sim_and_render(self):
-    pybullet.stepSimulation()
-    self.sim_step += 1
+  def cache_store_and_update(self, force=False):
 
     # Render current image at 8 FPS.
-    if self.sim_step % 60 == 0:
+    if force \
+      or (self.sim_step % 60 == 0 \
+          and len(self.cache_video[self.current_step]) < self.MAX_CACHE_LENGTH):
       self.cache_video[self.current_step].append(self.get_camera_image())
 
       self.update_current_state()
       self.state_sequence.append(self.current_state)
+
+  def step_sim_and_render(self):
+    pybullet.stepSimulation()
+    self.sim_step += 1
+
+    self.cache_store_and_update(False)
 
   def get_camera_image(self):
     image_size = (240, 240)
