@@ -81,6 +81,8 @@ class PickPlaceEnv():
     assert isinstance(state, State)
     assert state.index in self.state_ids
     pybullet.restoreState(state.index)
+    self.current_state_index = state.index
+    self.current_state = self.get_state()
 
   def get_body_info(self, obj_id):
 
