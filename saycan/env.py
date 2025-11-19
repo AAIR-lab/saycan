@@ -68,6 +68,7 @@ class PickPlaceEnv():
     else:
       pybullet.restoreState(self.init_state.index)
 
+    self.current_state_index = self.init_state.index
     self.current_state = self.init_state
     return self.get_observation()
 
