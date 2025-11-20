@@ -74,9 +74,10 @@ class SayCan:
         max_horizon=10):
         
         if output_dir is None:
-            output_dir = tempfile.TemporaryDirectory(
-                ignore_cleanup_errors=True)
+            temp_dir = tempfile.TemporaryDirectory()
+            output_dir = temp_dir.name
         else:
+            temp_dir = None
             os.makedirs(output_dir, exist_ok=True)
 
         self.initialize_vild_and_compute_affordances(output_dir)
@@ -115,8 +116,8 @@ class SayCan:
             helper.plot(llm_scores, self.affordance_scores, saycan_scores,
                 selected_action, fig_filepath=fig_filepath)
 
-        if isinstance(output_dir, tempfile.TemporaryDirectory):
-            del output_dir
+        if temp_dir is not None:
+            del temp_dir
 
         return high_level_actions
 
@@ -129,9 +130,10 @@ class SayCan:
         state=None, store_video=True):
 
         if output_dir is None:
-            output_dir = tempfile.TemporaryDirectory(
-                ignore_cleanup_errors=True)
+            temp_dir = tempfile.TemporaryDirectory()
+            output_dir = temp_dir.name
         else:
+            temp_dir = None
             os.makedirs(output_dir, exist_ok=True)
 
         with open("%s/plan.txt" % (output_dir), "w") as fh:
@@ -179,8 +181,8 @@ class SayCan:
         # for single executions
         self.env.reset_caches()
 
-        if isinstance(output_dir, tempfile.TemporaryDirectory):
-            del output_dir
+        if temp_dir is not None:
+            del temp_dir
 
         return state_sequence, actions
 
