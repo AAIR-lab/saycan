@@ -9,11 +9,16 @@ from saycan.constants import *
 from collections import defaultdict
 from moviepy.editor import ImageSequenceClip
 import tempfile
+import random
 
 class PickPlaceEnv():
 
-  def __init__(self, config, enable_gui=False, enable_debug_viz=False):
-    
+  def __init__(self, config, enable_gui=False, enable_debug_viz=False,
+               seed=None):
+
+    np.random.seed(seed)
+    random.seed(seed)
+
     self.config = config
     
     self.dt = 1/480
@@ -31,6 +36,7 @@ class PickPlaceEnv():
     pybullet.configureDebugVisualizer(pybullet.COV_ENABLE_GUI,
       enable_debug_viz)
     pybullet.setPhysicsEngineParameter(enableFileCaching=0)
+    pybullet.setPhysicsEngineParameter(deterministicOverlappingPairs=1)
 
     pybullet.setTimeStep(self.dt)
 
