@@ -73,7 +73,12 @@ class SayCan:
     def saycan(self, output_dir, task_prompt, client, state=None,
         max_horizon=10):
         
-        os.makedirs(output_dir, exist_ok=True)
+        if output_dir is None:
+            output_dir = tempfile.TemporaryDirectory(
+                ignore_cleanup_errors=True)
+        else:
+            os.makedirs(output_dir, exist_ok=True)
+
         self.initialize_vild_and_compute_affordances(output_dir)
 
         if state is not None:
@@ -110,6 +115,9 @@ class SayCan:
             helper.plot(llm_scores, self.affordance_scores, saycan_scores,
                 selected_action, fig_filepath=fig_filepath)
 
+        if isinstance(output_dir, tempfile.TemporaryDirectory):
+            del output_dir
+
         return high_level_actions
 
     def write_state_to_file(self, filepath):
@@ -120,7 +128,11 @@ class SayCan:
     def execute_plan(self, output_dir, plan,
         state=None, store_video=True):
 
-        os.makedirs(output_dir, exist_ok=True)
+        if output_dir is None:
+            output_dir = tempfile.TemporaryDirectory(
+                ignore_cleanup_errors=True)
+        else:
+            os.makedirs(output_dir, exist_ok=True)
 
         with open("%s/plan.txt" % (output_dir), "w") as fh:
             fh.write("\n".join(plan))
@@ -166,6 +178,9 @@ class SayCan:
         # Reset the caches since we want to save state sequences only
         # for single executions
         self.env.reset_caches()
+
+        if isinstance(output_dir, tempfile.TemporaryDirectory):
+            del output_dir
 
         return state_sequence, actions
 
