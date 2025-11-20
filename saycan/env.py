@@ -8,6 +8,7 @@ from saycan.robo_gripper import Robotiq2F85
 from saycan.constants import *
 from collections import defaultdict
 from moviepy.editor import ImageSequenceClip
+import tempfile
 
 class PickPlaceEnv():
 
@@ -50,40 +51,49 @@ class PickPlaceEnv():
 
     # Info to store the state ids
     self.state_ids = set()
-    self.current_state_index = None
     self.init_state = None
     self.current_state = None
     self.MAX_CACHE_LENGTH = 4
 
+  def get_pybullet_raw_data(self):
+
+    temp_filepath = tempfile.NamedTemporaryFile(delete=False).name
+
+    pybullet.saveBullet(temp_filepath)
+
+    with open(temp_filepath, "rb") as fh:
+      pybullet_raw_state = fh.read()
+
+    os.remove(temp_filepath)
+    return pybullet_raw_state
+  
+  def restore_pybullet_raw_data(self, raw_data):
+
+    temp_filepath = tempfile.NamedTemporaryFile(delete=False).name
+    with open(temp_filepath, "wb") as fh:
+      fh.write(raw_data)
+    
+    pybullet.restoreState(fileName=fh.name)
+    os.remove(temp_filepath)
+
   def reset(self):
 
-    # Restore to the initial state.
-    # A new random state will require a new "simulator instance"
-    # TODO: Add a force function to take a config, remove all stored states
-    #   and start affresh?
-    if len(self.state_ids) == 0:
-      assert self.init_state is None
+    if self.init_state is None:
       self.initialize_initial_state()
       self.init_state = self.get_state()
-    else:
-      pybullet.restoreState(self.init_state.index)
 
-    self.current_state_index = self.init_state.index
-    self.current_state = self.init_state
+    self.set_state(self.init_state)
     return self.get_observation()
 
   def update_current_state(self):
 
-    self.current_state_index = self.save_state()
     self.current_state = self.get_state()
 
   def set_state(self, state):
 
     assert isinstance(state, State)
-    assert state.index in self.state_ids
-    pybullet.restoreState(state.index)
-    self.current_state_index = state.index
-    self.current_state = self.get_state()
+    self.restore_pybullet_raw_data(state.raw_data)
+    self.update_current_state()
 
   def get_body_info(self, obj_id):
 
@@ -101,7 +111,9 @@ class PickPlaceEnv():
     for obj_name, obj_id in self.obj_name_to_id.items():
       body_infos[obj_name] = self.get_body_info(obj_id)
     
-    return State(index=self.current_state_index, body_infos=body_infos)
+    pybullet_raw_data = self.get_pybullet_raw_data()
+
+    return State(raw_data=pybullet_raw_data, body_infos=body_infos)
 
   def save_state(self):
 

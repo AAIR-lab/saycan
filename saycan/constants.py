@@ -3,7 +3,11 @@ import matplotlib
 from matplotlib import colors
 
 from pydantic import BaseModel
-from typing import Tuple, List, Dict
+from pydantic import Base64Bytes
+from pydantic import field_serializer
+from pydantic import field_validator
+from typing import Tuple, List, Dict, Union
+import base64
 
 class BodyInfo(BaseModel):
 
@@ -12,8 +16,22 @@ class BodyInfo(BaseModel):
 
 class State(BaseModel):
 
-  index: int
+  raw_data: bytes
   body_infos: Dict[str, BodyInfo]
+
+  @field_serializer("raw_data", when_used="json")
+  def serialize_raw_data(self, raw_data: bytes) -> str:
+
+    return base64.b64encode(raw_data).decode("ascii")
+  
+  @field_validator("raw_data", mode="before")
+  @classmethod
+  def validate_raw_data(cls, raw_data: Union[str, bytes]) -> bytes:
+
+    if isinstance(raw_data, str):
+      return base64.b64decode(raw_data)
+    else:
+      return raw_data
 
 class SayCanActionSpace(BaseModel):
 
