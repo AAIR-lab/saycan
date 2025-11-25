@@ -4,6 +4,7 @@ from saycan.constants import PICK_TARGETS, PLACE_TARGETS, PIXEL_SIZE, BOUNDS
 from heapq import nlargest
 import cv2
 import imageio
+from saycan import constants
 
 def build_scene_description(found_objects, block_name="box", bowl_name="circle"):
   scene_description = f"objects = {found_objects}"
@@ -25,6 +26,9 @@ def normalize_scores(scores):
 
 def plot(llm_scores, vfs, combined_scores, task, 
   correct=True, show_top=None, show_plot=False, fig_filepath=None):
+
+  if constants.DISABLE_MATPLOTLIB:
+    return
 
   if show_top:
     top_options = nlargest(show_top, combined_scores, key = combined_scores.get)

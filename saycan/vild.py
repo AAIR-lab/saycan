@@ -22,6 +22,7 @@ from saycan.clip_model import CLIPModel
 import flax
 import os
 from flax.training import checkpoints
+from saycan import constants
 
 STANDARD_COLORS = ["White"]
 # STANDARD_COLORS = [
@@ -635,6 +636,10 @@ def plot_mask(color, alpha, original_image, mask):
 
 # %matplotlib inline
 def display_image(path_or_array, size=(10, 10)):
+
+  if constants.DISABLE_MATPLOTLIB:
+    return
+
   if isinstance(path_or_array, str):
     image = np.asarray(Image.open(open(image_path, "rb")).convert("RGB"))
   else:
@@ -836,29 +841,30 @@ def run_cliport(output_dir, optim, env, obs, text):
   obs, _, _, _ = env.step(act)
 
   # Show pick and place action.
-  plt.title(text)
-  plt.imshow(prev_obs)
-  plt.arrow(pick_yx[1], pick_yx[0], place_yx[1]-pick_yx[1], place_yx[0]-pick_yx[0], color='w', head_starts_at_zero=False, head_width=7, length_includes_head=True)
-  plt.savefig("%s/s.png" % (output_dir))
+  if not constants.DISABLE_MATPLOTLIB:
+    plt.title(text)
+    plt.imshow(prev_obs)
+    plt.arrow(pick_yx[1], pick_yx[0], place_yx[1]-pick_yx[1], place_yx[0]-pick_yx[0], color='w', head_starts_at_zero=False, head_width=7, length_includes_head=True)
+    plt.savefig("%s/s.png" % (output_dir))
 
-  # Show debug plots.
-  plt.subplot(1, 2, 1)
-  plt.title('Pick Heatmap')
-  plt.imshow(pick_map.reshape(224, 224))
-  plt.subplot(1, 2, 2)
-  plt.title('Place Heatmap')
-  plt.imshow(place_map.reshape(224, 224))
-  plt.savefig("%s/action_heatmap.png" % (output_dir))
+    # Show debug plots.
+    plt.subplot(1, 2, 1)
+    plt.title('Pick Heatmap')
+    plt.imshow(pick_map.reshape(224, 224))
+    plt.subplot(1, 2, 2)
+    plt.title('Place Heatmap')
+    plt.imshow(place_map.reshape(224, 224))
+    plt.savefig("%s/action_heatmap.png" % (output_dir))
 
-  # Show camera image after pick and place.
-  plt.subplot(1, 2, 1)
-  plt.title('Before')
-  plt.imshow(before)
-  plt.subplot(1, 2, 2)
-  plt.title('After')
-  after = env.get_camera_image()
-  plt.imshow(after)
-  plt.savefig("%s/s_dash.png" % (output_dir))
+    # Show camera image after pick and place.
+    plt.subplot(1, 2, 1)
+    plt.title('Before')
+    plt.imshow(before)
+    plt.subplot(1, 2, 2)
+    plt.title('After')
+    after = env.get_camera_image()
+    plt.imshow(after)
+    plt.savefig("%s/s_dash.png" % (output_dir))
 
   # return pick_xyz, place_xyz, pick_map, place_map, pick_yx, place_yx
   return obs

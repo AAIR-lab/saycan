@@ -39,6 +39,8 @@ class SayCanActionSpace(BaseModel):
 
 #@markdown Global constants: pick and place objects, colors, workspace bounds
 
+DISABLE_MATPLOTLIB = True
+
 PICK_TARGETS = {
   "blue block": None,
   "red block": None,
