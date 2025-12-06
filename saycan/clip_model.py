@@ -2,15 +2,22 @@ import saycan
 import clip
 import numpy as np
 
+import torch
+
 class CLIPModel:
 
     def __init__(self, model_dir=saycan.ASSETS_DIR,
         print_model_info=True):
 
-        clip_model, clip_preprocess = clip.load("ViT-B/32")
+        run_on_gpu = torch.cuda.is_available()
+        device = "cuda" if run_on_gpu else "cpu"
+        clip_model, clip_preprocess = clip.load("ViT-B/32", device=device)
 
         # Set the model in eval mode.
-        clip_model.cuda().eval()
+        if run_on_gpu:
+            clip_model.cuda().eval()
+        else:
+            clip_model.eval()
 
         if print_model_info:
             print("Model parameters:", f"{np.sum([int(np.prod(p.shape)) for p in clip_model.parameters()]):,}")

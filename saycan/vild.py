@@ -808,8 +808,13 @@ def run_cliport(output_dir, optim, env, obs, text):
   before = env.get_camera_image()
   prev_obs = obs['image'].copy()
 
+  run_on_gpu = torch.cuda.is_available()
+
   # Tokenize text and get CLIP features.
-  text_tokens = clip.tokenize(text).cuda()
+  text_tokens = clip.tokenize(text)
+  if run_on_gpu:
+    text_tokens = text_tokens.cuda()
+
   with torch.no_grad():
     text_feats = clip_model.encode_text(text_tokens).float()
   text_feats /= text_feats.norm(dim=-1, keepdim=True)
